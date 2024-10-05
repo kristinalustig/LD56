@@ -14,12 +14,27 @@ SCENE = {
     WIN = 7
 }
 
+TILE_TYPE = {
+    GRASS = 1,
+    WATER = 2,
+    DESERT = 3,
+    FOREST = 4,
+    ICE = 5,
+    SNOW = 6,
+    JUNGLE = 7,
+    MOUNTAINS = 8,
+    CITY = 9,
+    PLAINS = 10,
+    BLANK = 11
+}
+
 function love.load()
 
     PushSetup()
 
     gs.load()
     C.load()
+    love.keyboard.setKeyRepeat(true, .5)
 
     if IS_DEBUG then
         -- do debug stuff here
@@ -37,38 +52,13 @@ function love.draw()
 
     push:start()
 
-    gs.draw()
-    
-    love.graphics.translate(c.getTranslate())
     local mx, my = push:toGame(love.mouse.getX(), love.mouse.getY())
 
-    if IS_DEBUG then
-        for i=-10, 10, 1 do
-            for j=-10, 10, 1 do
-                love.graphics.rectangle("fill", i*50, j*50, 50, 50)
-                if i%2 == 0 then
-                    if j % 2 == 0 then
-                        love.graphics.setColor(1, 0, 0)
-                    else
-                        love.graphics.setColor(1, 1, 1)
-                    end
-                elseif i % 3 == 0 then
-                    if j % 3 == 0 then
-                        love.graphics.setColor(0, 1, 0)
-                    else
-                        love.graphics.setColor(1, 1, 0)
-                    end
-                else
-                    love.graphics.setColor(0, 0, 1)
-                    if j % 2 == 0 then
-                        love.graphics.setColor(1, 0, 1)
-                    end
-                end
-            end
-        end
-        love.graphics.printf("("..math.floor(mx)..", "..math.floor(my)..")", mx, my, 100, "left")
-    end
-    
+    love.graphics.translate(c.getTranslate())
+    love.graphics.scale(c.getScale())
+
+    gs.draw(mx, my)
+
     push:finish()
 
 end
@@ -88,8 +78,16 @@ function PushSetup()
     push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {fullscreen = false, resizable = false, pixelperfect = true, stretched = true})
 end
 
-function love.keyreleased(k)
+function love.keypressed(k, _, isRepeat)
     if k == "up" or k == "down" or k == "left" or k == "right" or k == "w" or k == "a" or k == "s" or k == "d" or k == "r" then
-        c.setTranslate(k)
+        c.setTranslate(k, isRepeat)
     end
+end
+
+function love.wheelmoved(_, y)
+    c.setScale(y)
+end
+
+function love.mousereleased(x, y, b, _, _)
+    gs.handleMouse(x, y, b)
 end
